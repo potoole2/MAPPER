@@ -70,26 +70,26 @@ if doStitch
 
     mkdir(fftDirectory);
     
-%     % Z-project and FFT
-%     for k = 1:tiles
-%         for j = 1:length(channels)
-%             path = [inputDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '.TIF'];
-%             savepath = [zprojDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
-%             savepath2 = [fftDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
-%             
-%             MIJ.run('Open...', ['path=[' strrep(path, '\', '\\') ']']);
-%             
-%             MIJ.run('Bandpass Filter...',[ 'filter_large=' num2str(gaussSigma) ' filter_small=0 suppress=None tolerance=5 process']);
-% 
-%             MIJ.run('Tiff...', ['path=[' strrep(savepath2, '\', '\\') ']']);
-%             
-%             MIJ.run('Z Project...', 'projection=[Max Intensity]');
-%             
-%             MIJ.run('Tiff...', ['path=[' strrep(savepath, '\', '\\') ']']);
-%             
-%             MIJ.run('Close All');
-%         end
-%     end
+     % Z-project and FFT
+     for k = 1:tiles
+         for j = 1:length(channels)
+             path = [inputDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '.TIF'];
+             savepath = [zprojDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
+             savepath2 = [fftDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
+             
+             MIJ.run('Open...', ['path=[' strrep(path, '\', '\\') ']']);
+             
+             MIJ.run('Bandpass Filter...',[ 'filter_large=' num2str(gaussSigma) ' filter_small=0 suppress=None tolerance=5 process']);
+ 
+             MIJ.run('Tiff...', ['path=[' strrep(savepath2, '\', '\\') ']']);
+             
+             MIJ.run('Z Project...', 'projection=[Max Intensity]');
+             
+             MIJ.run('Tiff...', ['path=[' strrep(savepath, '\', '\\') ']']);
+             
+             MIJ.run('Close All');
+         end
+     end
     
 
     
@@ -119,7 +119,7 @@ if doStitch
    
     for i = 1:M*N:(tiles-1)
             
-%             MIJ.run('Memory & Threads...', 'maximum=12137 parallel=8 run');
+             MIJ.run('Memory & Threads...', 'maximum=12137 parallel=8 run');
         
             MIJ.run('Grid/Collection stitching', ['type=[Grid: row-by-row] order=[Right & Down                ] grid_size_x=' num2str(M) ' grid_size_y=' num2str(N) ' tile_overlap=' num2str(overlap) ' first_file_index_i=' num2str(i) ...
                 ' directory=[' strrep(tempDirectory, '\', '\\') '] file_names=[Tile {iiiii}.tif] ' ...
