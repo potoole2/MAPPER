@@ -47,8 +47,9 @@ end
 
 
 % Generate arrays of overlaps
-xres=20;
-yres=20;
+res=1;
+xres=res;
+yres=res;
 overlaps1 = zeros(M*N,length(channels),xres,yres,overlapsize);
 overlaps2 = zeros(M*N,length(channels),xres,yres,overlapsize);
 for i= 1:M*N
@@ -83,13 +84,19 @@ for i=1:M*N
         overlaps2(i,:,:,:,j) = overlaps1(overlaps(i).registration(j),:,:,:,find(overlaps(overlaps(i).registration(j)).registration == i));
     end
 end
-
-
 % Find a and b parameters for optimization by minimizing overlap residuals
+
+for j=1:length(channels)
+    for i = 1:M*N
+         means(i,j)=  mean(mean(tiles{i,1}(:,:,j)));
+    end
+    means(:,j) = mean(means(:,j))./means(:,j);
+end
+
 chan = length(channels);
-x0=[ones(M*N,length(channels)) zeros(M*N,length(channels))];
-x = customfminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',100000),overlaps,overlaps1,overlaps2,chan,M,N,xres,yres);
-x((round(N/2)-1)*M+round(M/2),1:chan)=1;
+x0=[ones(M*N,length(channels)).*means zeros(M*N,length(channels))];
+x = customfminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',1000000),overlaps,overlaps1,overlaps2,chan,M,N,xres,yres,means((round(N/2)-1)*M+round(M/2),1:chan));
+x((round(N/2)-1)*M+round(M/2),1:chan)=means((round(N/2)-1)*M+round(M/2),1:chan);
 x((round(N/2)-1)*M+round(M/2),chan+1:2*chan)=0;
 % Apply and b parameters to raw tiles and save optimized tiles
 for i = 1:M*N
