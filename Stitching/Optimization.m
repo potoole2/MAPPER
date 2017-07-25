@@ -47,8 +47,10 @@ end
 
 
 % Generate arrays of overlaps
-overlaps1 = zeros(M*N,length(channels),20,20,overlapsize);
-overlaps2 = zeros(M*N,length(channels),20,20,overlapsize);
+xres=20;
+yres=20;
+overlaps1 = zeros(M*N,length(channels),xres,yres,overlapsize);
+overlaps2 = zeros(M*N,length(channels),xres,yres,overlapsize);
 for i= 1:M*N
     for k = 1:length(overlaps(i).registration)
         if tiles{overlaps(i).registration(k),2}(1) <= tiles{i,2}(1)
@@ -72,7 +74,7 @@ for i= 1:M*N
             j2 = tiles{overlaps(i).registration(k),3}(2) - tiles{i,2}(2) + 1;
         end
         for h = 1:length(channels)
-            overlaps1(i,h,:,:,k) = imresize(double(tiles{i,1}(i1:i2,j1:j2,h)),[20 20],'bicubic');
+            overlaps1(i,h,:,:,k) = imresize(double(tiles{i,1}(i1:i2,j1:j2,h)),[xres yres],'bicubic');
         end
     end
 end
@@ -86,8 +88,9 @@ end
 % Find a and b parameters for optimization by minimizing overlap residuals
 chan = length(channels);
 x0=[ones(M*N,length(channels)) zeros(M*N,length(channels))];
-x = fminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',100),overlaps,overlaps1,overlaps2,chan);
-
+x = customfminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',100000),overlaps,overlaps1,overlaps2,chan,M,N,xres,yres);
+x((round(N/2)-1)*M+round(M/2),1:chan)=1;
+x((round(N/2)-1)*M+round(M/2),chan+1:2*chan)=0;
 % Apply and b parameters to raw tiles and save optimized tiles
 for i = 1:M*N
     for j = 1:length(channels)
