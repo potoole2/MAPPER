@@ -1,6 +1,6 @@
-function r=OverlapResiduals(x0,overlaps,overlaps1,overlaps2,chan,M,N,xres,yres)
+function r=OverlapResiduals(x0,overlaps,overlaps1,overlaps2,chan,M,N,xres,yres,means)
 
-x0((round(N/2)-1)*M+round(M/2),1:chan)=1;
+x0((round(N/2)-1)*M+round(M/2),1:chan)=means;
 x0((round(N/2)-1)*M+round(M/2),chan+1:2*chan)=0;
 
     
