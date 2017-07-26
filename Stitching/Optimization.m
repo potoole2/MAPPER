@@ -1,4 +1,4 @@
-function Optimization(M,N,tempDirectory,channels,numembs)
+function Optimization(M,N,tempDirectory,channels)
 
 
 
