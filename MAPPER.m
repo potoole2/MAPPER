@@ -119,7 +119,7 @@ if doStitch
    
     for i = 1:M*N:(tiles-1)
             
-             MIJ.run('Memory & Threads...', 'maximum=12137 parallel=8 run');
+%             MIJ.run('Memory & Threads...', 'maximum=12137 parallel=8 run');
         
             MIJ.run('Grid/Collection stitching', ['type=[Grid: row-by-row] order=[Right & Down                ] grid_size_x=' num2str(M) ' grid_size_y=' num2str(N) ' tile_overlap=' num2str(overlap) ' first_file_index_i=' num2str(i) ...
                 ' directory=[' strrep(tempDirectory, '\', '\\') '] file_names=[Tile {iiiii}.tif] ' ...
@@ -127,8 +127,8 @@ if doStitch
                 'regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement' ...
                 '_threshold=3.50 compute_overlap computation_parameters=[Save memory (but be slower)]' ...
                 ' image_output=[Fuse and display]']);
-            
-            Optimization(M,N,tempDirectory,channels,numembs)
+
+            Optimization(M,N,tempDirectory,channels)
             
             MIJ.run('Grid/Collection stitching', ['type=[Grid: row-by-row] order=[Right & Down                ] grid_size_x=' num2str(M) ' grid_size_y=' num2str(N) ' tile_overlap=' num2str(overlap) ' first_file_index_i=' num2str(i) ...
                 ' directory=[' strrep(tempDirectory, '\', '\\') '] file_names=[Optimized Tile {iiiii}.tif] ' ...
