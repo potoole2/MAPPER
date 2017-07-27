@@ -1,9 +1,9 @@
-function Optimization(M,N,tempDirectory,channels)
+function Optimization(M,N,tempDirectory,channels,embnum)
 
 
 
 % Find tile coordinates
-registration = importdata([tempDirectory 'TileConfiguration.registered.txt']);
+registration = importdata([tempDirectory 'TileConfiguration' num2str(embnum) '.registered.txt']);
 registration = extractBetween(registration(4:size(registration)),'(',')');
 for i = 1:size(registration)
     CoordinateString = extractAfter(registration{i},',');
@@ -20,7 +20,7 @@ tileCoordinates(:,2) = tileCoordinates(:,2) + (1-min(tileCoordinates(:,2)));
 files = dir(tempDirectory);
 for i = 1:M*N
     for j = 1:length(channels)
-        tiles{i,1}(:,:,j) = imread([tempDirectory files(i+2).name],j);
+        tiles{i,1}(:,:,j) = imread([tempDirectory 'Tile ' num2str(i+M*N*(embnum-1),'%05d'),'.TIF'],j);
     end
     tiles{i,2} = tileCoordinates(i,:);
     tiles{i,3} = tiles{i,2} + size(tiles{i,1}(:,:,1)) - 1;
@@ -47,7 +47,7 @@ end
 
 
 % Generate arrays of overlaps
-res=1;
+res=20;
 xres=res;
 yres=res;
 overlaps1 = zeros(M*N,length(channels),xres,yres,overlapsize);
@@ -93,19 +93,26 @@ for j=1:length(channels)
     means(:,j) = mean(means(:,j))./means(:,j);
 end
 
-chan = length(channels);
+numchannels = length(channels);
+numtiles =length(tiles);
 x0=[ones(M*N,length(channels)).*means zeros(M*N,length(channels))];
-x = customfminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',1000000),overlaps,overlaps1,overlaps2,chan,M,N,xres,yres,means((round(N/2)-1)*M+round(M/2),1:chan));
-x((round(N/2)-1)*M+round(M/2),1:chan)=means((round(N/2)-1)*M+round(M/2),1:chan);
-x((round(N/2)-1)*M+round(M/2),chan+1:2*chan)=0;
+
+
+
+channelmeans = means((round(N/2)-1)*M+round(M/2),1:numchannels);
+
+x = fminsearch(@OverlapResiduals_mex,x0,optimset('MaxFunEvals',100000),overlaps,overlaps1,overlaps2,numchannels,numtiles,M,N,xres,yres,channelmeans);
+x((round(N/2)-1)*M+round(M/2),1:numchannels)=means((round(N/2)-1)*M+round(M/2),1:numchannels);
+x((round(N/2)-1)*M+round(M/2),numchannels+1:2*numchannels)=0;
+
 % Apply and b parameters to raw tiles and save optimized tiles
 for i = 1:M*N
-    for j = 1:length(channels)
-        tiles{i,1}(:,:,j) = tiles{i,1}(:,:,j).*x(i,j) + x(i,j + chan);
+    for j = 1:numchannels
+        tiles{i,1}(:,:,j) = tiles{i,1}(:,:,j).*x(i,j) + x(i,j + numchannels);
         if j == 1
-            imwrite(tiles{i,1}(:,:,j),[tempDirectory 'Optimized Tile ' num2str(i,'%05d') '.TIF'])
+            imwrite(tiles{i,1}(:,:,j),[tempDirectory 'Optimized Tile ' num2str(i+M*N*(embnum-1),'%05d') '.TIF'])
         else
-            imwrite(tiles{i,1}(:,:,j),[tempDirectory 'Optimized Tile ' num2str(i,'%05d') '.TIF'],'writemode','append')
+            imwrite(tiles{i,1}(:,:,j),[tempDirectory 'Optimized Tile ' num2str(i+M*N*(embnum-1),'%05d') '.TIF'],'writemode','append')
         end
     end
 end
