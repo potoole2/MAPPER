@@ -70,26 +70,30 @@ if doStitch
 
     mkdir(fftDirectory);
     
-     % Z-project and FFT
-     for k = 1:tiles
-         for j = 1:length(channels)
-             path = [inputDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '.TIF'];
-             savepath = [zprojDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
-             savepath2 = [fftDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
-             
-             MIJ.run('Open...', ['path=[' strrep(path, '\', '\\') ']']);
-             
-             MIJ.run('Bandpass Filter...',[ 'filter_large=' num2str(gaussSigma) ' filter_small=0 suppress=None tolerance=5 process']);
- 
-             MIJ.run('Tiff...', ['path=[' strrep(savepath2, '\', '\\') ']']);
-             
-             MIJ.run('Z Project...', 'projection=[Max Intensity]');
-             
-             MIJ.run('Tiff...', ['path=[' strrep(savepath, '\', '\\') ']']);
-             
-             MIJ.run('Close All');
-         end
-     end
+    % Z-project and FFT
+    for k = 1:tiles
+        for j = 1:length(channels)
+            path = [inputDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '.TIF'];
+            savepath = [zprojDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
+            savepath2 = [fftDirectory fileName num2str(k,['%0' num2str(numChars) 'd']) '_w' num2str(j) 'Confocal ' channels{j} '_MIP.TIF'];
+            
+            MIJ.run('Open...', ['path=[' strrep(path, '\', '\\') ']']);
+            
+            if filterchoice == 1
+            MIJ.run('Bandpass Filter...',[ 'filter_large=' num2str(gaussSigma) ' filter_small=0 suppress=None tolerance=5 process']);
+            elseif filterchoice == 2
+            MIJ.run("Gaussian Blur 3D...", "x=100 y=100 z=100");
+            end
+            
+            MIJ.run('Tiff...', ['path=[' strrep(savepath2, '\', '\\') ']']);
+            
+            MIJ.run('Z Project...', 'projection=[Max Intensity]');
+            
+            MIJ.run('Tiff...', ['path=[' strrep(savepath, '\', '\\') ']']);
+            
+            MIJ.run('Close All');
+        end
+    end
     
 
     
@@ -117,22 +121,22 @@ if doStitch
     
     % Stitch
    
-    for i = 1:M*N:(tiles-1)
+    for embnum = 1:numembs
             
-%             MIJ.run('Memory & Threads...', 'maximum=12137 parallel=8 run');
+            MIJ.run('Memory & Threads...', 'maximum=12137 parallel=8 run');
         
-            MIJ.run('Grid/Collection stitching', ['type=[Grid: row-by-row] order=[Right & Down                ] grid_size_x=' num2str(M) ' grid_size_y=' num2str(N) ' tile_overlap=' num2str(overlap) ' first_file_index_i=' num2str(i) ...
+            MIJ.run('Grid/Collection stitching', ['type=[Grid: row-by-row] order=[Right & Down                ] grid_size_x=' num2str(M) ' grid_size_y=' num2str(N) ' tile_overlap=' num2str(overlap) ' first_file_index_i=' num2str(1+M*N*(embnum-1)) ...
                 ' directory=[' strrep(tempDirectory, '\', '\\') '] file_names=[Tile {iiiii}.tif] ' ...
-                'output_textfile_name=TileConfiguration.txt fusion_method=[Do not fuse images (only write TileConfiguration)] ' ...
+                'output_textfile_name=TileConfiguration' num2str(embnum) '.txt fusion_method=[Do not fuse images (only write TileConfiguration)] ' ...
                 'regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement' ...
                 '_threshold=3.50 compute_overlap computation_parameters=[Save memory (but be slower)]' ...
                 ' image_output=[Fuse and display]']);
 
-            Optimization(M,N,tempDirectory,channels)
+            Optimization(M,N,tempDirectory,channels,embnum)
             
-            MIJ.run('Grid/Collection stitching', ['type=[Grid: row-by-row] order=[Right & Down                ] grid_size_x=' num2str(M) ' grid_size_y=' num2str(N) ' tile_overlap=' num2str(overlap) ' first_file_index_i=' num2str(i) ...
+            MIJ.run('Grid/Collection stitching', ['type=[Grid: row-by-row] order=[Right & Down                ] grid_size_x=' num2str(M) ' grid_size_y=' num2str(N) ' tile_overlap=' num2str(overlap) ' first_file_index_i=' num2str(1+M*N*(embnum-1)) ...
                 ' directory=[' strrep(tempDirectory, '\', '\\') '] file_names=[Optimized Tile {iiiii}.tif] ' ...
-                'output_textfile_name=TileConfiguration.txt fusion_method=[Linear Blending] ' ...
+                'output_textfile_name=OptimizedTileConfiguration' num2str(embnum) '.txt fusion_method=[Linear Blending] ' ...
                 'regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement' ...
                 '_threshold=3.50 compute_overlap computation_parameters=[Save memory (but be slower)]' ...
                 ' image_output=[Fuse and display]']);
@@ -152,6 +156,7 @@ if doStitch
     
     
     % Cleanup
+
     MIJ.exit;
         rmdir(tempDirectory,'s');
     end
