@@ -47,7 +47,7 @@ end
 
 
 % Generate arrays of overlaps
-res=20;
+res=5;
 xres=res;
 yres=res;
 overlaps1 = zeros(M*N,length(channels),xres,yres,overlapsize);
@@ -101,7 +101,7 @@ x0=[ones(M*N,length(channels)).*means zeros(M*N,length(channels))];
 
 channelmeans = means((round(N/2)-1)*M+round(M/2),1:numchannels);
 
-x = fminsearch(@OverlapResiduals_mex,x0,optimset('MaxFunEvals',100000),overlaps,overlaps1,overlaps2,numchannels,numtiles,M,N,xres,yres,channelmeans);
+x = customfminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',10000000),overlaps,overlaps1,overlaps2,numchannels,numtiles,M,N,xres,yres,channelmeans);
 x((round(N/2)-1)*M+round(M/2),1:numchannels)=means((round(N/2)-1)*M+round(M/2),1:numchannels);
 x((round(N/2)-1)*M+round(M/2),numchannels+1:2*numchannels)=0;
 
@@ -116,6 +116,5 @@ for i = 1:M*N
         end
     end
 end
-
 
 
