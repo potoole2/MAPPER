@@ -101,7 +101,7 @@ x0=[ones(M*N,length(channels)).*means zeros(M*N,length(channels))];
 
 channelmeans = means((round(N/2)-1)*M+round(M/2),1:numchannels);
 
-x = customfminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',10000000),overlaps,overlaps1,overlaps2,numchannels,numtiles,M,N,xres,yres,channelmeans);
+x = fminsearch(@OverlapResiduals,x0,optimset('MaxFunEvals',10000000),overlaps,overlaps1,overlaps2,numchannels,numtiles,M,N,xres,yres,channelmeans);
 x((round(N/2)-1)*M+round(M/2),1:numchannels)=means((round(N/2)-1)*M+round(M/2),1:numchannels);
 x((round(N/2)-1)*M+round(M/2),numchannels+1:2*numchannels)=0;
 
