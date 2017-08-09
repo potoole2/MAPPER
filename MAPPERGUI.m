@@ -111,7 +111,7 @@ if handles.stitchButton.Value == 1
     fijiDir = handles.var{3}(1:length(handles.var{3})-1);
     
     gaussSigma = str2num(handles.gaussSigmaBox.String);
-    filterchoice = 2;
+    filterchoice = 3;
     
 elseif handles.stitchButton.Value == 0
     doStitch = 0;
