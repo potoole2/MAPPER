@@ -22,7 +22,7 @@ function varargout = MAPPERGUI(varargin)
 
 % Edit the above text to modify the response to help MAPPERGUI
 
-% Last Modified by GUIDE v2.5 18-Jul-2017 15:00:36
+% Last Modified by GUIDE v2.5 07-Aug-2017 11:18:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -111,7 +111,14 @@ if handles.stitchButton.Value == 1
     fijiDir = handles.var{3}(1:length(handles.var{3})-1);
     
     gaussSigma = str2num(handles.gaussSigmaBox.String);
-    filterchoice = 3;
+   if handles.VignetteCorrectionBox.Value == 1
+        if handles.SigmaButton.Value == 1
+            filterchoice = 1;
+        elseif handles.GaussButton.Value == 1
+            filterchoice=2;
+        end
+   end
+    
     
 elseif handles.stitchButton.Value == 0
     doStitch = 0;
@@ -832,3 +839,30 @@ function edit34_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in VignetteCorrectionBox.
+function VignetteCorrectionBox_Callback(hObject, eventdata, handles)
+% hObject    handle to VignetteCorrectionBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of VignetteCorrectionBox
+
+
+% --- Executes on button press in GaussButton.
+function GaussButton_Callback(hObject, eventdata, handles)
+% hObject    handle to GaussButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of GaussButton
+
+
+% --- Executes on button press in SigmaButton.
+function SigmaButton_Callback(hObject, eventdata, handles)
+% hObject    handle to SigmaButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of SigmaButton
