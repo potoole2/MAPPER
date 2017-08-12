@@ -84,7 +84,7 @@ if doStitch
             
             if filterchoice == 1
                 MIJ.run('Open...', ['path=[' strrep(path, '\', '\\') ']']);
-                MIJ.run('Bandpass Filter...',[ 'filter_large=' num2str(gaussSigma) ' filter_small=0 suppress=None tolerance=5 process']);
+                MIJ.run('Bandpass Filter...',[ 'filter_large=' num2str(FFThigh) ' filter_small=' num2str(FFTlow) ' suppress=None tolerance=5 process']);
                 MIJ.run('Tiff...', ['path=[' strrep(savepath2, '\', '\\') ']']);
             elseif filterchoice == 2
                 MIJ.run('Open...', ['path=[' strrep(path, '\', '\\') ']']);
@@ -98,7 +98,8 @@ if doStitch
             elseif filterchoice == 3
                 for i = 1:25
                     FFT = fft2(imread(path,i));
-                    FFT = FFT.*(abs(fft2(imread(path,i)))<gaussSigma);
+                    FFT = FFT.*(abs(fft2(imread(path,i)))<FFThigh);
+                    FFT = FFT.*(abs(fft2(imread(path,i)))>FFTlow);
                     IFFT = ifft2(FFT);
                     IFFT = cast(IFFT,class(imread(path,i)));
                     if i == 1
