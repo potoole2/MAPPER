@@ -117,7 +117,7 @@ if handles.stitchButton.Value == 1
             channels{fileNum}=a{:};
         end
     end
-    channels=channels(~cellfun('isempty',channels))
+    channels=channels(~cellfun('isempty',channels));
     channels = unique(channels);
 
     M = str2double(handles.MBox.String);
