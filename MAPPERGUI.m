@@ -22,7 +22,7 @@ function varargout = MAPPERGUI(varargin)
 
 % Edit the above text to modify the response to help MAPPERGUI
 
-% Last Modified by GUIDE v2.5 07-Aug-2017 11:18:19
+% Last Modified by GUIDE v2.5 11-Aug-2017 12:40:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -80,7 +80,7 @@ function uploadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-[filename,directory] = uigetfile
+[filename,directory] = uigetfile;
 if directory ~= 0
     handles.var{1} = {directory,filename};
     handles.var{2} = importdata([directory,filename]);
@@ -89,38 +89,60 @@ if directory ~= 0
 end
 
 
-% --- Executes on button press in runBotton.
-function runBotton_Callback(hObject, eventdata, handles)
-% hObject    handle to runBotton (see GCBO)
+% --- Executes on button press in runButton.
+function runButton_Callback(hObject, eventdata, handles)
+% hObject    handle to runButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 directory = handles.var{1}(1);
 filename = handles.var{1}(2);
 file = handles.var{2};
 
+  UndScore=strfind(filename,'_');
+TotlUnd = length(UndScore{:});
+DirectoryList = dir(directory{:});
+TileNum = extractBetween(filename,((UndScore{:}(TotlUnd-1))+1),((UndScore{:}(TotlUnd)))-1);
+numChars = length(TileNum{:});
+fileName = cell2mat(extractBefore(filename,(UndScore{:}(TotlUnd-1))));
+
+
+
 if handles.stitchButton.Value == 1
     doStitch = 1;
+    for fileNum = 1:length(DirectoryList)
+        UndScore=strfind(DirectoryList(fileNum).name,'_');
+        if UndScore >= 2
+            TotlUnd = length(UndScore);
+           a=(extractBetween(DirectoryList(fileNum).name,((UndScore(TotlUnd))+1),".TIF"));
+            channels{fileNum}=a{:};
+        end
+    end
+    channels=channels(~cellfun('isempty',channels))
+    channels = unique(channels);
+
     M = str2double(handles.MBox.String);
     N = str2double(handles.NBox.String);
     overlap = handles.overlapBox.String;
-    fileName = [handles.filenameBox.String,' '];
+%     fileName = [handles.filenameBox.String,' '];
     numembs = str2num(handles.numembsBox.String);
-    channels = {handles.channelsBox1.String,handles.channelsBox2.String,handles.channelsBox3.String,handles.channelsBox4.String};
-    channels = channels(~cellfun('isempty',channels));
-    numChars = str2num(handles.numCharsBox.String);
+%     channels = {handles.channelsBox1.String,handles.channelsBox2.String,handles.channelsBox3.String,handles.channelsBox4.String};
+%     channels = channels(~cellfun('isempty',channels));
+%     numChars = str2num(handles.numCharsBox.String);
     fijiDir = handles.var{3}(1:length(handles.var{3})-1);
+    doVignettingCorrection = handles.VignetteCorrectionBox.Value;
     
-    gaussSigma = str2num(handles.gaussSigmaBox.String);
-    FFTlow = 25000;
-    FFThigh = 70000;
-   if handles.VignetteCorrectionBox.Value == 1
-        if handles.SigmaButton.Value == 1
-            filterchoice = 3;
-        elseif handles.GaussButton.Value == 1
-            filterchoice=2;
+   if handles.VignetteCorrectionBox.Value == 1;
+        if handles.SigmaButton.Value == 1;
+            filterchoice = 1;
+            FFTvalue= str2num(handles.FFTvalue.String);
+        elseif handles.GaussButton.Value == 1;
+            filterchoice = 2;
+            gaussSigma = str2num(handles.gaussSigmaBox.String);
         end
    end
     
+       FFTlow = 0;
+    FFThigh = 100000;
     
 elseif handles.stitchButton.Value == 0
     doStitch = 0;
@@ -868,3 +890,26 @@ function SigmaButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of SigmaButton
+
+
+
+function FFTvalue_Callback(hObject, eventdata, handles)
+% hObject    handle to FFTvalue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of FFTvalue as text
+%        str2double(get(hObject,'String')) returns contents of FFTvalue as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function FFTvalue_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to FFTvalue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
